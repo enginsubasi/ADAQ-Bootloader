@@ -67,7 +67,7 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint32_t tsFor100ms = 0;
   /* USER CODE END 1 */
   
 
@@ -98,6 +98,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if ( ( HAL_GetTick ( ) - tsFor100ms ) > 98 )
+	  {
+		  tsFor100ms = HAL_GetTick ( );
+
+		  static char txt[] = "test1\r\n";
+
+		  CDC_Transmit_FS (txt,strlen(txt));
+	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -66,6 +66,21 @@ void Error_Handler(void);
 #define LED3_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
+#define LED1_HIGH 	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+#define LED1_LOW 	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+#define LED1_TOGGLE	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+#define LED1(VAL)	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, VAL);
+
+#define LED2_HIGH 	HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+#define LED2_LOW 	HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+#define LED2_TOGGLE	HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+#define LED2(VAL)	HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, VAL);
+
+#define LED3_HIGH 	HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+#define LED3_LOW 	HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+#define LED3_TOGGLE	HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+#define LED3(VAL)	HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, VAL);
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
