@@ -27,6 +27,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "usbd_cdc_if.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,19 +96,21 @@ int main(void)
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_TIM_Base_Start_IT(&htim17);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if ( ( HAL_GetTick ( ) - tsFor100ms ) > 98 )
+	  if ( ( HAL_GetTick ( ) - tsFor100ms ) > 99 )
 	  {
 		  tsFor100ms = HAL_GetTick ( );
 
 		  static char txt[] = "test1\r\n";
-
-		  CDC_Transmit_FS (txt,strlen(txt));
+		  LED3_TOGGLE;
+		  CDC_Transmit_FS ((uint8_t*)txt,strlen(txt));
 	  }
 
     /* USER CODE END WHILE */
