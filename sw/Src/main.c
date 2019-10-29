@@ -44,8 +44,13 @@
 #define ADR_APP					0x08008000 /* From 32k to 128k. Size 96k */
 #define ADR_UPDATE_FLAG			ADR_APP - 0x800
 
+#define ADR_BTL_BEGIN           0x08000000
+#define ADR_BTL_END             ADR_BTL_BEGIN + 0x600
+
 #define ADR_BTL_CRC				ADR_APP - 0x1000
 #define ADR_APP_CRC				ADR_APP - 0x1800
+
+#define CRC_BEGIN               0xFFFFFFFF
 
 /* USER CODE END PD */
 
@@ -58,6 +63,11 @@
 
 /* USER CODE BEGIN PV */
 
+/* Flash operation */
+pFunction JumpToApplication;
+uint32_t JumpAddress;
+
+/* Communication operation */
 com_t rx;
 com_t tx;
 
@@ -83,7 +93,9 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+
 	uint32_t tsFor100ms = 0;
+
   /* USER CODE END 1 */
   
 
@@ -94,6 +106,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+  /* Com. init */
   rx.index = 0;
   tx.index = 0;
 
@@ -103,6 +116,30 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+
+  if ( btlCrcControl ( ) == BTL_ER )
+  {
+
+  }
+
+  if ( appCrcControl ( ) == BTL_ER )
+  {
+
+  }
+
+  if ( updFlagCheck ( ) == BTL_UPD )
+  {
+
+  }
+  else
+  {
+      /* Jump to user application */
+      JumpAddress = *(__IO uint32_t*) (ADR_APP + 4);
+      JumpToApplication = (pFunction) JumpAddress;
+      /* Initialize user application's Stack Pointer */
+      __set_MSP(*(__IO uint32_t*) ADR_APP);
+      JumpToApplication();
+  }
 
   /* USER CODE END SysInit */
 
@@ -182,15 +219,39 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+/*
+ * @about:
+ */
+uint32_t crcCalculator ( uint32_t adrBegin, uint32_t adrEnd )
+{
+    uint32_t calculatedChecksum = CRC_BEGIN;
+
+    uint32_t adrCounter = adrBegin;
+
+    for ( ; adrCounter < adrEnd; adrCounter += 4 )
+    {
+        /* TODO: Flash read operation */
+        calculatedChecksum ^= adrCounter;
+    }
+
+    return ( calculatedChecksum );
+}
+
+/*
+ * @about:
+ */
 int8_t btlCrcControl ( void )
 {
 	int8_t retVal = BTL_ER;
 
-
+	crcCalculator ( ADR_BTL_BEGIN, ADR_BTL_END );
 
 	return ( retVal );
 }
 
+/*
+ * @about:
+ */
 int8_t appCrcControl ( void )
 {
 	int8_t retVal = BTL_ER;
@@ -200,15 +261,21 @@ int8_t appCrcControl ( void )
 	return ( retVal );
 }
 
+/*
+ * @about:
+ */
 int8_t updFlagCheck ( void )
 {
-	int8_t retVal = BTL_ER;
+	int8_t retVal = BTL_UPD;
 
 
 
 	return ( retVal );
 }
 
+/*
+ * @about:
+ */
 void comEvaluate ( void )
 {
 	if ( rx.index != 0 )

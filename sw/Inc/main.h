@@ -38,6 +38,8 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+typedef  void (*pFunction)(void);
+
 typedef struct {
 	uint8_t 		buffer[ 256 ];
 	uint32_t 		index;
@@ -60,6 +62,7 @@ enum returnValue
 {
 	BTL_ER = 0,
 	BTL_OK = 1,
+	BTL_UPD = 2,
 };
 
 /* USER CODE END EM */
@@ -68,6 +71,8 @@ enum returnValue
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+
+uint32_t crcCalculator ( uint32_t adrBegin, uint32_t adrEnd );
 
 int8_t btlCrcControl ( void );
 int8_t appCrcControl ( void );
