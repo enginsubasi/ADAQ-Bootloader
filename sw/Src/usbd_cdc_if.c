@@ -24,6 +24,8 @@
 
 /* USER CODE BEGIN INCLUDE */
 
+#include <string.h>
+
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -266,12 +268,8 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
-  if ( Buf[ 0 ] == 'A' && Buf[ 1 ] == 'T' && Buf[ 2 ] == '\r' && Buf[ 3 ] == '\n' )
-  {
-	  LED2_TOGGLE;
-  }
-
-
+  memcpy ( rx.buffer + rx.index, Buf, *Len );
+  rx.index += *Len;
 
   return (USBD_OK);
   /* USER CODE END 6 */

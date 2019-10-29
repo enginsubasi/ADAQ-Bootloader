@@ -38,6 +38,13 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+typedef struct {
+	uint8_t 		buffer[ 256 ];
+	uint32_t 		index;
+}rx_t;
+
+extern rx_t rx;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

@@ -50,6 +50,10 @@
 
 /* USER CODE BEGIN PV */
 
+rx_t rx;
+
+uint8_t txBuffer[ 256 ] = { 0 };
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,6 +84,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+
+  rx.index = 0;
 
   /* USER CODE END Init */
 
