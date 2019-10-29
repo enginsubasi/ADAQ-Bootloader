@@ -65,8 +65,8 @@
 /* USER CODE BEGIN PRIVATE_DEFINES */
 /* Define size for the receive and transmit buffer over CDC */
 /* It's up to user to redefine and/or remove those define */
-#define APP_RX_DATA_SIZE  1000
-#define APP_TX_DATA_SIZE  1000
+#define APP_RX_DATA_SIZE  256
+#define APP_TX_DATA_SIZE  256
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
@@ -268,7 +268,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 
   if ( Buf[ 0 ] == 'A' && Buf[ 1 ] == 'T' && Buf[ 2 ] == '\r' && Buf[ 3 ] == '\n' )
   {
-	  LED3_TOGGLE;
+	  LED2_TOGGLE;
   }
 
 
