@@ -41,9 +41,10 @@ extern "C" {
 typedef struct {
 	uint8_t 		buffer[ 256 ];
 	uint32_t 		index;
-}rx_t;
+} com_t;
 
-extern rx_t rx;
+extern com_t rx;
+extern com_t tx;
 
 /* USER CODE END ET */
 
@@ -55,12 +56,24 @@ extern rx_t rx;
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
+enum returnValue
+{
+	BTL_ER = 0,
+	BTL_OK = 1,
+};
+
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+
+int8_t btlCrcControl ( void );
+int8_t appCrcControl ( void );
+int8_t updFlagCheck ( void );
+
+void comEvaluate ( void );
 
 /* USER CODE END EFP */
 

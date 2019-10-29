@@ -27,6 +27,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <string.h>
+
 #include "usbd_cdc_if.h"
 
 /* USER CODE END Includes */
@@ -39,6 +41,12 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+#define ADR_APP					0x08008000 /* From 32k to 128k. Size 96k */
+#define ADR_UPDATE_FLAG			ADR_APP - 0x800
+
+#define ADR_BTL_CRC				ADR_APP - 0x1000
+#define ADR_APP_CRC				ADR_APP - 0x1800
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,7 +58,8 @@
 
 /* USER CODE BEGIN PV */
 
-rx_t rx;
+com_t rx;
+com_t tx;
 
 uint8_t txBuffer[ 256 ] = { 0 };
 
@@ -86,6 +95,7 @@ int main(void)
   /* USER CODE BEGIN Init */
 
   rx.index = 0;
+  tx.index = 0;
 
   /* USER CODE END Init */
 
@@ -110,13 +120,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  comEvaluate ( );
+
 	  if ( ( HAL_GetTick ( ) - tsFor100ms ) > 99 )
 	  {
 		  tsFor100ms = HAL_GetTick ( );
 
-		  static char txt[] = "test1\r\n";
+		  /* CPU LED BLINKING */
 		  LED3_TOGGLE;
-		  CDC_Transmit_FS ((uint8_t*)txt,strlen(txt));
 	  }
 
     /* USER CODE END WHILE */
@@ -170,6 +181,60 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+int8_t btlCrcControl ( void )
+{
+	int8_t retVal = BTL_ER;
+
+
+
+	return ( retVal );
+}
+
+int8_t appCrcControl ( void )
+{
+	int8_t retVal = BTL_ER;
+
+
+
+	return ( retVal );
+}
+
+int8_t updFlagCheck ( void )
+{
+	int8_t retVal = BTL_ER;
+
+
+
+	return ( retVal );
+}
+
+void comEvaluate ( void )
+{
+	if ( rx.index != 0 )
+	{
+		if ( rx.buffer[ 0 ] == 'A' && rx.buffer[ 1 ] == 'T' && rx.buffer[ 2 ] == '\r' && rx.buffer[ 3 ] == '\n' )
+		{
+			strcpy ( ( char* ) tx.buffer, "OK\r\n" );
+
+			tx.index = strlen ( ( char* ) tx.buffer );
+
+			CDC_Transmit_FS ( tx.buffer, tx.index );
+
+			rx.index -= 4;
+		}
+		else if ( rx.index > 100 )
+		{
+			strcpy ( ( char* ) tx.buffer, "ER\r\n" );
+
+			tx.index = strlen ( ( char* ) tx.buffer );
+
+			CDC_Transmit_FS ( tx.buffer, tx.index );
+
+			rx.index = 0;
+		}
+	}
+}
 
 /* USER CODE END 4 */
 
