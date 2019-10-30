@@ -31,6 +31,8 @@
 
 #include "usbd_cdc_if.h"
 
+#include "Btl_Flash_Operations.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,17 +42,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
-#define ADR_APP					0x08008000 /* From 32k to 128k. Size 96k */
-#define ADR_UPDATE_FLAG			ADR_APP - 0x800
-
-#define ADR_BTL_BEGIN           0x08000000
-#define ADR_BTL_END             ADR_BTL_BEGIN + 0x600
-
-#define ADR_BTL_CRC				ADR_APP - 0x1000
-#define ADR_APP_CRC				ADR_APP - 0x1800
-
-#define CRC_BEGIN               0xFFFFFFFF
 
 /* USER CODE END PD */
 
@@ -220,18 +211,21 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /*
- * @about:
+ * @about: Calculates 32-bits CRC between address range. CRC begin macro defined in CRC_BEGIN.
  */
 uint32_t crcCalculator ( uint32_t adrBegin, uint32_t adrEnd )
 {
     uint32_t calculatedChecksum = CRC_BEGIN;
 
+    uint32_t *ptr32;
+
     uint32_t adrCounter = adrBegin;
 
     for ( ; adrCounter < adrEnd; adrCounter += 4 )
     {
-        /* TODO: Flash read operation */
-        calculatedChecksum ^= adrCounter;
+        ptr32 = ( uint32_t* )adrCounter;
+
+        calculatedChecksum ^= *ptr32;
     }
 
     return ( calculatedChecksum );
@@ -244,7 +238,35 @@ int8_t btlCrcControl ( void )
 {
 	int8_t retVal = BTL_ER;
 
-	crcCalculator ( ADR_BTL_BEGIN, ADR_BTL_END );
+	uint32_t *ptr32;
+
+	uint32_t calculatedCrc = crcCalculator ( ADR_BTL_BEGIN, ADR_BTL_END );
+
+	ptr32 = (uint32_t*)( ADR_BTL_CRC );
+
+	if ( *ptr32 == 0xFFFFFFFF )
+	{
+	    HAL_FLASH_Unlock ( );
+
+        HAL_FLASH_Program ( FLASH_TYPEPROGRAM_WORD, ADR_BTL_CRC, calculatedCrc );
+
+        HAL_FLASH_Lock ( );
+	}
+	else
+	{
+	    if ( calculatedCrc == *ptr32 )
+	    {
+	        /* Bootloader side CRC OK */
+	        retVal = BTL_OK;
+	    }
+	    else
+	    {
+	        /* Bootloader side CRC Error */
+	        retVal = BTL_ER;
+	    }
+	}
+
+
 
 	return ( retVal );
 }
