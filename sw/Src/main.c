@@ -31,7 +31,8 @@
 
 #include "usbd_cdc_if.h"
 
-#include "Btl_Flash_Operations.h"
+#include "btl_flash_operations.h"
+#include "btl_com.h"
 
 /* USER CODE END Includes */
 
@@ -86,6 +87,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
 	uint32_t tsFor100ms = 0;
+	uint8_t comTxTrigger = 0;
 
   /* USER CODE END 1 */
   
@@ -148,7 +150,18 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  comEvaluate ( );
+
+	  comEvaluate ( rx.buffer, &rx.index, tx.buffer, &tx.index, &comTxTrigger );
+
+	  if ( comTxTrigger )
+	  {
+	      if ( CDC_Transmit_FS ( tx.buffer, tx.index ) == USBD_OK )
+	      {
+	          /* Intentionally blank */
+	      }
+
+	      comTxTrigger = 0;
+	  }
 
 	  if ( ( HAL_GetTick ( ) - tsFor100ms ) > 99 )
 	  {
@@ -234,15 +247,26 @@ uint32_t crcCalculator ( uint32_t adrBegin, uint32_t adrEnd )
 /*
  * @about:
  */
+uint32_t readCRCFromFlash ( uint32_t adrBegin, uint32_t adrEnd )
+{
+    return ( ADR_BTL_CRC );
+}
+
+/*
+ * @about:
+ */
 int8_t btlCrcControl ( void )
 {
 	int8_t retVal = BTL_ER;
 
 	uint32_t *ptr32;
 
+	/* Calculates bootloader CRC value */
 	uint32_t calculatedCrc = crcCalculator ( ADR_BTL_BEGIN, ADR_BTL_END );
 
-	ptr32 = (uint32_t*)( ADR_BTL_CRC );
+	/* Reads bootloader CRC value from flash area */
+	/* ptr32 = ( uint32_t* )( ADR_BTL_CRC ); */
+	ptr32 = ( uint32_t* ) readCRCFromFlash ( ADR_BTL_CRC, ADR_BTL_CRC + 0x200 );
 
 	if ( *ptr32 == 0xFFFFFFFF )
 	{
@@ -265,8 +289,6 @@ int8_t btlCrcControl ( void )
 	        retVal = BTL_ER;
 	    }
 	}
-
-
 
 	return ( retVal );
 }
@@ -293,36 +315,6 @@ int8_t updFlagCheck ( void )
 
 
 	return ( retVal );
-}
-
-/*
- * @about:
- */
-void comEvaluate ( void )
-{
-	if ( rx.index != 0 )
-	{
-		if ( rx.buffer[ 0 ] == 'A' && rx.buffer[ 1 ] == 'T' && rx.buffer[ 2 ] == '\r' && rx.buffer[ 3 ] == '\n' )
-		{
-			strcpy ( ( char* ) tx.buffer, "OK\r\n" );
-
-			tx.index = strlen ( ( char* ) tx.buffer );
-
-			CDC_Transmit_FS ( tx.buffer, tx.index );
-
-			rx.index -= 4;
-		}
-		else if ( rx.index > 100 )
-		{
-			strcpy ( ( char* ) tx.buffer, "ER\r\n" );
-
-			tx.index = strlen ( ( char* ) tx.buffer );
-
-			CDC_Transmit_FS ( tx.buffer, tx.index );
-
-			rx.index = 0;
-		}
-	}
 }
 
 /* USER CODE END 4 */

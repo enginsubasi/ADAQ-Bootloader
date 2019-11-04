@@ -59,13 +59,13 @@ extern com_t tx;
 /* USER CODE BEGIN EM */
 
 #define ADR_APP                 0x08008000 /* From 32k to 128k. Size 96k */
-#define ADR_UPDATE_FLAG         ADR_APP - 0x800
+#define ADR_UPDATE_FLAG         ( ADR_APP - 0x800 )
 
 #define ADR_BTL_BEGIN           0x08000000
-#define ADR_BTL_END             ADR_BTL_BEGIN + 0x600
+#define ADR_BTL_END             ( ADR_BTL_BEGIN + 0x600 )
 
-#define ADR_BTL_CRC             ADR_APP - 0x1000
-#define ADR_APP_CRC             ADR_APP - 0x1800
+#define ADR_BTL_CRC             ( ADR_APP - 0x1000 )
+#define ADR_APP_CRC             ( ADR_APP - 0x1800 )
 
 #define CRC_BEGIN               0xFFFFFFFF
 
@@ -84,12 +84,11 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 
 uint32_t crcCalculator ( uint32_t adrBegin, uint32_t adrEnd );
+uint32_t readCRCFromFlash ( uint32_t adrBegin, uint32_t adrEnd );
 
 int8_t btlCrcControl ( void );
 int8_t appCrcControl ( void );
 int8_t updFlagCheck ( void );
-
-void comEvaluate ( void );
 
 /* USER CODE END EFP */
 
