@@ -127,10 +127,10 @@ int main(void)
   else
   {
       /* Jump to user application */
-      JumpAddress = *(__IO uint32_t*) (ADR_APP + 4);
+      JumpAddress = *(__IO uint32_t*) (ADR_APP_BEGIN + 4);
       JumpToApplication = (pFunction) JumpAddress;
       /* Initialize user application's Stack Pointer */
-      __set_MSP(*(__IO uint32_t*) ADR_APP);
+      __set_MSP(*(__IO uint32_t*) ADR_APP_BEGIN);
       JumpToApplication();
   }
 

@@ -7,18 +7,21 @@
 
 #include "btl_com.h"
 
+#include "btl_flash_operations.h"
+
 #include "usbd_cdc_if.h"
 
 #include <string.h>
 
-const char resAt[ ]             = "OK\r\n";
+const char resOk[ ]             = "OK\r\n";
+const char resNOk[ ]            = "NOK\r\n";
 const char resRst[ ]            = "OK\r\n";
 const char resWhoAmI[ ]         = "ADAQ Bootloader\r\n";
 const char resVer[ ]            = "V100 2019 11 05\r\n";
 const char resInfo[ ]           = "Kies Research and Development Center-USB Bootloader for ADAQ data acquisition system.\r\n";
 const char resRepo[ ]           = "github.com/enginsubasi/ADAQ-Bootloader";
 
-const char resError[ ] = "ERROR\r\n";
+const char resError[ ]          = "ERROR\r\n";
 
 void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, uint32_t* indexOfTx, uint8_t* txTrigger )
 {
@@ -28,9 +31,12 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
         {
             rxString[ *indexOfRx ] = 0;
 
+            /*
+             * General commands
+             */
             if ( strCmpCast ( rxString, "AT\r\n" ) == 0 )
             {
-                strCpyCast ( txString, resAt );
+                strCpyCast ( txString, resOk );
             }
             else if ( strCmpCast ( rxString, "AT+RST\r\n" ) == 0 )
             {
@@ -52,6 +58,15 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
             {
                 strCpyCast ( txString, resRepo );
             }
+            /*
+             * Bootloader commands
+             */
+            else if ( strCmpCast ( rxString, "AT+ERASEAPP\r\n") == 0 )
+            {
+                eraseFlashPart ( ADR_APP_BEGIN, APP_PAGE_LENGHT );
+                strCpyCast ( txString, resOk );
+            }
+
             else
             {
                 strCpyCast ( txString, resError );
