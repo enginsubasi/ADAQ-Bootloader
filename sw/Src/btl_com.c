@@ -12,6 +12,7 @@
 #include "usbd_cdc_if.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 const char resOk[ ]             = "OK\r\n";
 const char resNOk[ ]            = "NOK\r\n";
@@ -63,10 +64,109 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
              */
             else if ( strCmpCast ( rxString, "AT+ERASEAPP\r\n") == 0 )
             {
-                eraseFlashPart ( ADR_APP_BEGIN, APP_PAGE_LENGHT );
-                strCpyCast ( txString, resOk );
+                if ( eraseFlashPart ( ADR_APP_BEGIN, APP_PAGE_LENGHT ) == 1 )
+                {
+                    strCpyCast ( txString, resOk );
+                }
+                else
+                {
+                    strCpyCast ( txString, resNOk );
+                }
             }
 
+            else if ( rxString[ 0 ] == 'A' && rxString[ 1 ] == 'T' &&
+                    rxString[ 2 ] == '+' && rxString[ 3 ] == 'W' &&
+                    rxString[ 4 ] == 'R' && rxString[ 5 ] == '=' )
+            {
+                static int32_t countOfPart = 0;
+                static uint32_t wrAdr = 0;
+                static uint8_t crcOfPart = 0;
+                static uint8_t calculatedCrcOfPart = 0;
+                static uint8_t tempHexToIntCharArray[ 64 ] = { 0 };
+                static uint8_t tempWriteData[ 64 ] = { 0 };
+
+                static char * pEnd; /* for strtol */
+
+                static uint32_t i = 0;
+
+                rxString += 6;
+
+                if ( rxString[ 1 ] == '3' )
+                {
+                    /* Count of part */
+                    rxString += 2;
+
+                    memcpy ( tempHexToIntCharArray, rxString, 2 );
+
+                    countOfPart = strtol ( ( char* ) tempHexToIntCharArray, &pEnd, 16 );
+
+                    calculatedCrcOfPart = countOfPart;
+
+                    /* Write address */
+                    rxString += 2;
+
+                    memcpy ( tempHexToIntCharArray, rxString, 8 );
+
+                    wrAdr = strtol ( ( char* ) tempHexToIntCharArray, &pEnd, 16 );
+
+                    tempHexToIntCharArray[ 2 ] = 0;
+
+                    calculatedCrcOfPart += ( ( wrAdr >> 24 ) & 0xFF );
+                    calculatedCrcOfPart += ( ( wrAdr >> 16 ) & 0xFF );
+                    calculatedCrcOfPart += ( ( wrAdr >> 8 ) & 0xFF );
+                    calculatedCrcOfPart += ( ( wrAdr >> 0 ) & 0xFF );
+
+                    /* Write data array */
+                    rxString += 8;
+
+                    for ( i = 0 ; i < ( countOfPart - 5 ) ; ++i )
+                    {
+                        memcpy ( tempHexToIntCharArray, rxString, 2 );
+                        tempWriteData[ i ] = strtol ( ( char* ) tempHexToIntCharArray, &pEnd, 16 );
+
+                        calculatedCrcOfPart += tempWriteData[ i ];
+
+                        rxString += 2;
+                    }
+
+                    calculatedCrcOfPart ^= 0xFF;
+
+                    /* Checksum */
+                    memcpy ( tempHexToIntCharArray, rxString, 2 );
+
+                    crcOfPart = strtol ( ( char* ) tempHexToIntCharArray, &pEnd, 16 );
+
+                    if ( crcOfPart == calculatedCrcOfPart )
+                    {
+                        if ( writeFlashPart ( wrAdr, tempWriteData, ( countOfPart - 5 ) ) == 1 )
+                        {
+                            strCpyCast ( txString, resOk );
+                        }
+                        else
+                        {
+                            strCpyCast ( txString, resNOk );
+                        }
+                    }
+                    else
+                    {
+
+                    }
+
+                    if (crcOfPart==2)strCpyCast ( txString, resOk );
+                }
+                else if ( rxString[ 1 ] == '0' )
+                {
+
+                }
+                else if ( rxString[ 1 ] == '7' )
+                {
+
+                }
+                else
+                {
+
+                }
+            }
             else
             {
                 strCpyCast ( txString, resError );
