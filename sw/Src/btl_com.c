@@ -73,7 +73,7 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
             }
             else if ( strCmpCast ( rxString, "AT+ERASEAPP\r\n") == 0 )
             {
-                if ( eraseFlashPart ( ADR_APP_BEGIN, APP_PAGE_LENGHT ) == 1 )
+                if ( eraseFlashPart ( ADR_APP_BEGIN - 0x1000 , APP_PAGE_LENGHT + 2 ) == 1 )
                 {
                     strCpyCast ( txString, resOk );
                 }
@@ -145,7 +145,8 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
 
                     crcOfPart = strtol ( ( char* ) tempHexToIntCharArray, &pEnd, 16 );
 
-                    if ( ( wrAdr > ADR_APP_BEGIN ) && ( wrAdr < ADR_END_OF_FLASH ) )
+                    /* 0x800 means in the following row that bootloader crc area */
+                    if ( ( wrAdr > ( ADR_BTL_BEGIN + BTL_SIZE + 0x800 ) ) && ( wrAdr < ADR_APP_END ) )
                     {
                         if ( crcOfPart == calculatedCrcOfPart )
                         {
@@ -174,6 +175,8 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
                 }
                 else if ( rxString[ 1 ] == '7' )
                 {
+                    eraseFlashPart ( ADR_UPDATE_FLAG, 1 );
+
                     strCpyCast ( txString, resOk );
                 }
                 else

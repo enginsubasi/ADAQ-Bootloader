@@ -108,12 +108,7 @@ int main(void)
 
   if ( btlCrcControl ( ) == BTL_ER )
   {
-
-  }
-
-  if ( appCrcControl ( ) == BTL_ER )
-  {
-
+      jumpToApplication ( ADR_APP_BEGIN );
   }
 
   if ( updFlagCheck ( ) == BTL_UPD )
@@ -238,14 +233,6 @@ uint32_t crcCalculator ( uint32_t adrBegin, uint32_t adrEnd )
 /*
  * @about:
  */
-uint32_t readCRCFromFlash ( uint32_t adrBegin, uint32_t adrEnd )
-{
-    return ( ADR_BTL_CRC );
-}
-
-/*
- * @about:
- */
 int8_t btlCrcControl ( void )
 {
 	int8_t retVal = BTL_ER;
@@ -257,7 +244,7 @@ int8_t btlCrcControl ( void )
 
 	/* Reads bootloader CRC value from flash area */
 	/* ptr32 = ( uint32_t* )( ADR_BTL_CRC ); */
-	ptr32 = ( uint32_t* ) readCRCFromFlash ( ADR_BTL_CRC, ADR_BTL_CRC + 0x200 );
+	ptr32 = ( uint32_t* ) ADR_BTL_CRC;
 
 	if ( *ptr32 == 0xFFFFFFFF )
 	{
@@ -266,6 +253,8 @@ int8_t btlCrcControl ( void )
         HAL_FLASH_Program ( FLASH_TYPEPROGRAM_WORD, ADR_BTL_CRC, calculatedCrc );
 
         HAL_FLASH_Lock ( );
+
+        retVal = BTL_OK;
 	}
 	else
 	{
@@ -289,11 +278,9 @@ int8_t btlCrcControl ( void )
  */
 int8_t appCrcControl ( void )
 {
-	int8_t retVal = BTL_ER;
+    int8_t retVal = BTL_OK;
 
-
-
-	return ( retVal );
+    return ( retVal );
 }
 
 /*
@@ -303,7 +290,27 @@ int8_t updFlagCheck ( void )
 {
 	int8_t retVal = BTL_UPD;
 
+	uint32_t *ptr32;
 
+	ptr32 = ( uint32_t* ) ADR_UPDATE_FLAG;
+
+	if ( *ptr32 != 0xFFFFFFFF )
+	{
+	    retVal = BTL_UPD;
+	}
+	else
+	{
+	    ptr32 = ( uint32_t* ) ADR_APP_BEGIN;
+
+	    if ( *ptr32 == 0xFFFFFFFF )
+        {
+            retVal = BTL_UPD;
+        }
+	    else
+	    {
+	        retVal = BTL_OK;
+	    }
+	}
 
 	return ( retVal );
 }
