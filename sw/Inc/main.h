@@ -61,6 +61,8 @@ extern com_t tx;
 #define APP_PAGE_LENGHT         ( APP_SIZE / 2 / 2048 )
 #define ADR_UPDATE_FLAG         ( ADR_APP - 0x800 )
 
+#define ADR_END_OF_FLASH        0x08020000
+
 #define ADR_BTL_BEGIN           0x08000000
 #define BTL_SIZE                0x6000
 #define ADR_BTL_END             ( ADR_BTL_BEGIN + BTL_SIZE )
