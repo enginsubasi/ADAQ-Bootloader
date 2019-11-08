@@ -38,8 +38,6 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
-typedef  void (*pFunction)(void);
-
 typedef struct {
 	uint8_t 		buffer[ 256 ];
 	uint32_t 		index;

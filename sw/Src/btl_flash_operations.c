@@ -9,9 +9,13 @@
 
 #include "main.h"
 
+/* Flash operation */
+pFunction JumpToApplication;
+uint32_t JumpAddress;
+
 /*
- * Returns 1 on success
- * 0 on fail
+ * @about: Write flash area.
+ * @retval: Returns 1 on success 0 on fail.
  */
 uint8_t writeFlashPart ( uint32_t flashAdr, uint8_t* buffer_addr, uint32_t byteNumber )
 {
@@ -38,6 +42,10 @@ uint8_t writeFlashPart ( uint32_t flashAdr, uint8_t* buffer_addr, uint32_t byteN
     return ( retVal );
 }
 
+/*
+ * @about: Erase flash area.
+ * @retval: Returns 1 on success 0 on fail.
+ */
 uint8_t eraseFlashPart( uint32_t adrBegin, uint32_t pageNumber )
 {
     uint8_t retVal = 0;
@@ -49,7 +57,7 @@ uint8_t eraseFlashPart( uint32_t adrBegin, uint32_t pageNumber )
 
     EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
     EraseInitStruct.PageAddress = adrBegin;
-    EraseInitStruct.NbPages = pageNumber; // 46 : 94208 / 2048 Application with CRC
+    EraseInitStruct.NbPages = pageNumber; // 1 page 2048 bytes
 
     if ( HAL_FLASHEx_Erase ( &EraseInitStruct, &pageError ) == HAL_OK )
     {
@@ -59,5 +67,18 @@ uint8_t eraseFlashPart( uint32_t adrBegin, uint32_t pageNumber )
     HAL_FLASH_Lock();
 
     return ( retVal );
+}
+
+/*
+ * @about: Jump to application function. Call in main loop!
+ */
+void jumpToApplication ( uint32_t adr )
+{
+    /* Jump to user application */
+    JumpAddress = *(__IO uint32_t*) ( adr + 4);
+    JumpToApplication = (pFunction) JumpAddress;
+    /* Initialize user application's Stack Pointer */
+    __set_MSP(*(__IO uint32_t*) adr );
+    JumpToApplication ( );
 }
 

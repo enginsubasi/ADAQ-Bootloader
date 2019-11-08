@@ -55,10 +55,6 @@
 
 /* USER CODE BEGIN PV */
 
-/* Flash operation */
-pFunction JumpToApplication;
-uint32_t JumpAddress;
-
 /* Communication operation */
 com_t rx;
 com_t tx;
@@ -126,12 +122,7 @@ int main(void)
   }
   else
   {
-      /* Jump to user application */
-      JumpAddress = *(__IO uint32_t*) (ADR_APP_BEGIN + 4);
-      JumpToApplication = (pFunction) JumpAddress;
-      /* Initialize user application's Stack Pointer */
-      __set_MSP(*(__IO uint32_t*) ADR_APP_BEGIN);
-      JumpToApplication();
+      jumpToApplication ( ADR_APP_BEGIN );
   }
 
   /* USER CODE END SysInit */
