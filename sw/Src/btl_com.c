@@ -73,7 +73,7 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
             }
             else if ( strCmpCast ( rxString, "AT+ERASEAPP\r\n") == 0 )
             {
-                if ( eraseFlashPart ( ADR_APP_BEGIN - 0x1000 , APP_PAGE_LENGHT + 2 ) == 1 )
+                if ( eraseFlashPart ( ADR_APP_BEGIN - 0x800 , APP_PAGE_LENGHT + 1 ) == 1 )
                 {
                     strCpyCast ( txString, resOk );
                 }

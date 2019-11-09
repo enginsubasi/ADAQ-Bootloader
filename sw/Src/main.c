@@ -84,6 +84,7 @@ int main(void)
 
 	uint32_t tsFor100ms = 0;
 	uint8_t comTxTrigger = 0;
+	int8_t updFlagCheckRetVal = 0;
 
   /* USER CODE END 1 */
   
@@ -106,24 +107,30 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
-  if ( btlCrcControl ( ) == BTL_ER )
+  MX_GPIO_Init();
+
+  updFlagCheckRetVal = updFlagCheck ( );
+
+  if ( updFlagCheckRetVal == BTL_UPD )
+  {
+
+  }
+  else if ( updFlagCheckRetVal == BTL_OK )
   {
       jumpToApplication ( ADR_APP_BEGIN );
-  }
-
-  if ( updFlagCheck ( ) == BTL_UPD )
-  {
-
   }
   else
   {
-      jumpToApplication ( ADR_APP_BEGIN );
+      LED1_HIGH;
+      LED2_HIGH;
+      LED3_HIGH
+      while ( 1 );
   }
 
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
+  /* MX_GPIO_Init(); */
   MX_USB_DEVICE_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
@@ -288,29 +295,40 @@ int8_t appCrcControl ( void )
  */
 int8_t updFlagCheck ( void )
 {
-	int8_t retVal = BTL_UPD;
+	int8_t retVal = BTL_ER;
 
 	uint32_t *ptr32;
 
-	ptr32 = ( uint32_t* ) ADR_UPDATE_FLAG;
 
-	if ( *ptr32 != 0xFFFFFFFF )
-	{
-	    retVal = BTL_UPD;
-	}
-	else
-	{
-	    ptr32 = ( uint32_t* ) ADR_APP_BEGIN;
 
-	    if ( *ptr32 == 0xFFFFFFFF )
+	if ( HAL_GPIO_ReadPin ( FORCED_BTL_GPIO_Port, FORCED_BTL_Pin ) == GPIO_PIN_SET )
+    {
+        retVal = BTL_UPD;
+    }
+    else
+    {
+        ptr32 = ( uint32_t* ) ADR_UPDATE_FLAG;
+
+        if ( *ptr32 != 0xFFFFFFFF )
         {
             retVal = BTL_UPD;
         }
-	    else
-	    {
-	        retVal = BTL_OK;
-	    }
-	}
+        else
+        {
+            ptr32 = ( uint32_t* ) ADR_APP_BEGIN;
+
+            if ( *ptr32 == 0xFFFFFFFF )
+            {
+                retVal = BTL_UPD;
+            }
+            else
+            {
+                retVal = BTL_OK;
+            }
+        }
+    }
+
+
 
 	return ( retVal );
 }

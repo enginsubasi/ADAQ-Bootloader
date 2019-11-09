@@ -67,8 +67,8 @@ extern com_t tx;
 #define ADR_BTL_END             ( ADR_BTL_BEGIN + BTL_SIZE )
 
 #define ADR_BTL_CRC             ( ADR_APP_BEGIN - 0x1800 )
-#define ADR_APP_CRC             ( ADR_APP_BEGIN - 0x1000 )
-#define ADR_UPDATE_FLAG         ( ADR_APP_BEGIN - 0x800 )
+#define ADR_UPDATE_FLAG         ( ADR_APP_BEGIN - 0x1000 )
+#define ADR_APP_CRC             ( ADR_APP_BEGIN - 0x800 )
 
 #define CRC_BEGIN               0xFFFFFFFF
 
