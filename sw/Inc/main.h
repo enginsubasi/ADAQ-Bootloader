@@ -95,6 +95,8 @@ int8_t updFlagCheck ( void );
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define FORCED_BTL_Pin GPIO_PIN_9
+#define FORCED_BTL_GPIO_Port GPIOA
 #define LED1_Pin GPIO_PIN_7
 #define LED1_GPIO_Port GPIOB
 #define LED2_Pin GPIO_PIN_8
