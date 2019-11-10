@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "tim.h"
 #include "usb_device.h"
 #include "gpio.h"
 
@@ -130,12 +129,9 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  /* MX_GPIO_Init(); */
+  MX_GPIO_Init();
   MX_USB_DEVICE_Init();
-  MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-
-  HAL_TIM_Base_Start_IT(&htim17);
 
   /* USER CODE END 2 */
 
@@ -143,7 +139,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
 	  comEvaluate ( rx.buffer, &rx.index, tx.buffer, &tx.index, &comTxTrigger );
 
 	  if ( comTxTrigger )
@@ -299,8 +294,6 @@ int8_t updFlagCheck ( void )
 
 	uint32_t *ptr32;
 
-
-
 	if ( HAL_GPIO_ReadPin ( FORCED_BTL_GPIO_Port, FORCED_BTL_Pin ) == GPIO_PIN_SET )
     {
         retVal = BTL_UPD;
@@ -327,8 +320,6 @@ int8_t updFlagCheck ( void )
             }
         }
     }
-
-
 
 	return ( retVal );
 }

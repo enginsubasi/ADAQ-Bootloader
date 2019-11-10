@@ -69,7 +69,19 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
              */
             else if ( strCmpCast ( rxString, "AT+JTA\r\n") == 0 )
             {
-                jumpToApplication ( ADR_APP_BEGIN );
+                HAL_NVIC_SystemReset ( );
+                //jumpToApplication ( ADR_APP_BEGIN );
+            }
+            else if ( strCmpCast ( rxString, "AT+BFCLR\r\n") == 0 )
+            {
+                if ( eraseFlashPart ( ADR_UPDATE_FLAG, 1 ) == 1 )
+                {
+                    strCpyCast ( txString, resOk );
+                }
+                else
+                {
+                    strCpyCast ( txString, resNOk );
+                }
             }
             else if ( strCmpCast ( rxString, "AT+ERASEAPP\r\n") == 0 )
             {
@@ -175,9 +187,15 @@ void comEvaluate ( uint8_t* rxString, uint32_t* indexOfRx, uint8_t* txString, ui
                 }
                 else if ( rxString[ 1 ] == '7' )
                 {
-                    eraseFlashPart ( ADR_UPDATE_FLAG, 1 );
-
-                    strCpyCast ( txString, resOk );
+                    /* Clear update flag */
+                    if ( eraseFlashPart ( ADR_UPDATE_FLAG, 1 ) == 1 )
+                    {
+                        strCpyCast ( txString, resOk );
+                    }
+                    else
+                    {
+                        strCpyCast ( txString, resNOk );
+                    }
                 }
                 else
                 {
